@@ -15,3 +15,8 @@ class DistanceResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str = Field(default="ok")
+
+
+class AdminInfo(BaseModel):
+    service_name: str
+    uptime_seconds: float

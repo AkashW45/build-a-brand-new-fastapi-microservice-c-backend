@@ -47,3 +47,10 @@ def test_missing_celsius_returns_422():
 def test_missing_km_returns_422():
     response = client.get("/convert/distance")
     assert response.status_code == 422
+
+
+def test_admin_page():
+    response = client.get("/admin")
+    assert response.status_code == 200
+    assert "Service Name" in response.text
+    assert "Uptime" in response.text
