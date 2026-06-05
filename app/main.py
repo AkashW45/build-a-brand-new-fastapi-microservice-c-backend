@@ -39,3 +39,19 @@ async def admin_page():
     </html>
     """
     return HTMLResponse(content=html_content, status_code=200)
+
+
+# Flask admin page on port 5000
+from flask import Flask
+
+flask_app = Flask(__name__)
+
+@flask_app.route('/admin')
+def flask_admin():
+    uptime = datetime.now(timezone.utc) - start_time
+    html = f"""<html><head><title>Admin - Unit Converter</title></head><body><h1>Unit Converter Service</h1><p>Service Name: Unit Converter Service</p><p>Uptime: {uptime}</p></body></html>"""
+    return html
+
+if __name__ == '__main__':
+    print("Starting Flask admin server on port 5000...")
+    flask_app.run(host='0.0.0.0', port=5000)
