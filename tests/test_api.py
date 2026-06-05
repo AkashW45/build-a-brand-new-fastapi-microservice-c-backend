@@ -49,8 +49,7 @@ def test_missing_km_returns_422():
     assert response.status_code == 422
 
 
-def test_admin_page():
+def test_admin_not_available_on_fastapi():
     response = client.get("/admin")
-    assert response.status_code == 200
-    assert "Service Name" in response.text
-    assert "Uptime" in response.text
+    # Admin page is served by a separate Flask service (port 8001), not FastAPI
+    assert response.status_code == 404

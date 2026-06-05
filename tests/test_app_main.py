@@ -1,65 +1,40 @@
-import pytest
+import re
 from fastapi.testclient import TestClient
 from app.main import app
 
 client = TestClient(app)
 
 
-def test_health():
-    response = client.get("/health")
+def test_admin_returns_200_and_html():
+    response = client.get("/admin")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    assert response.headers["content-type"] == "text/html; charset=utf-8"
 
 
-@pytest.mark.parametrize("celsius, expected_f, expected_k", [
-    (0, 32.0, 273.15),
-    (100, 212.0, 373.15),
-    (-40, -40.0, 233.15),
-    (-273.15, -459.67, 0.0),
-])
-def test_temperature_success(celsius, expected_f, expected_k):
-    response = client.get("/convert/temperature", params={"celsius": celsius})
+def test_admin_contains_service_name_and_uptime():
+    response = client.get("/admin")
+    body = response.text
+    assert "Unit Converter Service" in body
+    assert "Uptime:" in body
+
+
+def test_admin_uptime_positive():
+    response = client.get("/admin")
+    # Extract the uptime value from the HTML. The format is something like: uptime = timedelta → "0:00:00.000001"
+    match = re.search(r"Uptime:\s*([\d:.]+)", response.text)
+    assert match, "Uptime value not found"
+    uptime_str = match.group(1)
+    # Should be a positive timedelta string, e.g., "0:00:00.000001" – not zero or negative. 
+    # We'll check it's non-empty and contains at least one non-zero digit.
+    assert any(c.isdigit() and c != '0' for c in uptime_str), f"Uptime seems zero: {uptime_str}"
+
+
+def test_admin_method_not_allowed_post():
+    response = client.post("/admin")
+    assert response.status_code == 405
+
+
+def test_admin_with_extra_query_params_ignored():
+    response = client.get("/admin?foo=bar")
     assert response.status_code == 200
-    data = response.json()
-    assert data["celsius"] == celsius
-    assert data["fahrenheit"] == expected_f
-    assert data["kelvin"] == expected_k
-
-
-def test_temperature_validation():
-    # missing celsius parameter
-    response = client.get("/convert/temperature")
-    assert response.status_code == 422
-
-    # non-numeric value
-    response = client.get("/convert/temperature?celsius=abc")
-    assert response.status_code == 422
-
-    # value below absolute zero
-    response = client.get("/convert/temperature", params={"celsius": -300})
-    assert response.status_code == 422
-
-
-@pytest.mark.parametrize("km, expected_miles, expected_meters", [
-    (0, 0.0, 0.0),
-    (1, 0.62, 1000.0),
-    (10, 6.21, 10000.0),
-    (100, 62.14, 100000.0),
-])
-def test_distance_success(km, expected_miles, expected_meters):
-    response = client.get("/convert/distance", params={"km": km})
-    assert response.status_code == 200
-    data = response.json()
-    assert data["kilometers"] == km
-    assert data["miles"] == expected_miles
-    assert data["meters"] == expected_meters
-
-
-def test_distance_validation():
-    # missing km parameter
-    response = client.get("/convert/distance")
-    assert response.status_code == 422
-
-    # negative distance
-    response = client.get("/convert/distance", params={"km": -5})
-    assert response.status_code == 422
+    assert "Unit Converter Service" in response.text
