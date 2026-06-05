@@ -39,6 +39,12 @@ def test_admin_info_missing_service_name():
         AdminInfo(uptime_seconds=100)
 
 
+def test_admin_info_to_dict():
+    obj = AdminInfo(service_name="Unit Converter", uptime_seconds=3600.5)
+    d = obj.model_dump()
+    assert d == {"service_name": "Unit Converter", "uptime_seconds": 3600.5}
+
+
 def test_temperature_response_zero_values():
     obj = TemperatureResponse(celsius=0.0, fahrenheit=32.0, kelvin=273.15)
     assert obj.celsius == 0.0

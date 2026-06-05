@@ -1,7 +1,9 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTMLResponse
+from datetime import datetime, timezone
 from app.models import TemperatureResponse, DistanceResponse, HealthResponse
 
 app = FastAPI(title="Unit Converter Service", description="Temperature and distance conversion API", version="1.0.0")
+start_time = datetime.now(timezone.utc)
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -21,3 +23,19 @@ async def convert_distance(km: float = Query(..., ge=0, description="Distance in
     miles = km * 0.621371
     meters = km * 1000
     return DistanceResponse(kilometers=km, miles=round(miles, 2), meters=round(meters, 2))
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_page():
+    uptime = datetime.now(timezone.utc) - start_time
+    html_content = f"""
+    <html>
+        <head><title>Admin - Unit Converter</title></head>
+        <body>
+            <h1>Unit Converter Service</h1>
+            <p>Service Name: Unit Converter Service</p>
+            <p>Uptime: {uptime}</p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
