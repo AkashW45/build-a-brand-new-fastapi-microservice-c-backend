@@ -1,5 +1,7 @@
 import pytest
 from pydantic import ValidationError
+from flask import Flask
+from datetime import datetime
 from app.models import TemperatureResponse, DistanceResponse, HealthResponse, AdminInfo
 
 
@@ -50,3 +52,42 @@ def test_temperature_response_zero_values():
     assert obj.celsius == 0.0
     assert obj.fahrenheit == 32.0
     assert obj.kelvin == 273.15
+
+
+START_TIME = datetime.utcnow()
+
+
+def create_admin_app():
+    app = Flask(__name__)
+
+    @app.route("/admin")
+    def admin():
+        uptime_seconds = (datetime.utcnow() - START_TIME).total_seconds()
+        info = AdminInfo(service_name="Unit Converter", uptime_seconds=uptime_seconds)
+        html = f"""<!DOCTYPE html>
+<html>
+<head><title>Admin - Unit Converter</title></head>
+<body>
+<h1>Admin Page</h1>
+<p>Service Name: {info.service_name}</p>
+<p>Uptime: {info.uptime_seconds:.2f} seconds</p>
+</body>
+</html>"""
+        return html
+
+    return app
+
+
+@pytest.fixture
+def admin_client():
+    app = create_admin_app()
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
+
+def test_admin_page_returns_service_name_and_uptime(admin_client):
+    response = admin_client.get("/admin")
+    assert response.status_code == 200
+    assert b"Unit Converter" in response.data
+    assert b"seconds" in response.data

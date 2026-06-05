@@ -53,3 +53,14 @@ def test_admin_not_available_on_fastapi():
     response = client.get("/admin")
     # Admin page is served by a separate Flask service (port 8001), not FastAPI
     assert response.status_code == 404
+
+
+def test_admin_page_via_flask():
+    from app.admin_flask import app as flask_app
+    flask_client = flask_app.test_client()
+    response = flask_client.get("/admin")
+    assert response.status_code == 200
+    html = response.text
+    assert "Unit Converter Service" in html
+    assert "Uptime" in html
+    assert "seconds" in html or "minutes" in html
