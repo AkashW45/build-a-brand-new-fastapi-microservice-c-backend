@@ -24,3 +24,12 @@ class AdminInfo(BaseModel):
 
 class CelsiusInput(BaseModel):
     celsius: float
+
+
+class FahrenheitInput(BaseModel):
+    fahrenheit: float
+
+
+def fahrenheit_to_celsius(f: float) -> float:
+    """Convert Fahrenheit to Celsius."""
+    return (f - 32) * 5.0 / 9.0

@@ -71,5 +71,14 @@ def test_root_html_page():
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     html = response.text
-    assert "Celsius to Fahrenheit" in html
+    assert "Fahrenheit to Celsius" in html
     assert "Convert" in html
+
+
+def test_fahrenheit_conversion_via_api():
+    response = client.get("/convert/temperature?fahrenheit=212")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["celsius"] == 100.0
+    assert data["fahrenheit"] == 212.0
+    assert data["kelvin"] == 373.15
