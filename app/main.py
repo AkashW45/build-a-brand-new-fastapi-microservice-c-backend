@@ -1,6 +1,9 @@
-from fastapi import FastAPI, Query, HTMLResponse, Form
+from fastapi import FastAPI, Query, Form
+from fastapi.responses import HTMLResponse
 from datetime import datetime, timezone
 from app.models import TemperatureResponse, DistanceResponse, HealthResponse
+import sys
+import argparse
 
 app = FastAPI(title="Unit Converter Service", description="Temperature and distance conversion API", version="1.0.0")
 start_time = datetime.now(timezone.utc)
@@ -92,6 +95,16 @@ def flask_admin():
     html = f"""<html><head><title>Admin - Unit Converter</title></head><body><h1>Unit Converter Service</h1><p>Service Name: Unit Converter Service</p><p>Uptime: {uptime}</p></body></html>"""
     return html
 
+def fahrenheit_to_celsius(f: float) -> float:
+    return (f - 32) * 5.0/9.0
+
 if __name__ == '__main__':
-    print("Starting Flask admin server on port 5000...")
-    flask_app.run(host='0.0.0.0', port=5000)
+    parser = argparse.ArgumentParser(description="Convert Fahrenheit to Celsius")
+    parser.add_argument("fahrenheit", type=float, nargs='?', help="Temperature in Fahrenheit")
+    args = parser.parse_args()
+    if args.fahrenheit is not None:
+        celsius = fahrenheit_to_celsius(args.fahrenheit)
+        print(f"{args.fahrenheit}°F = {round(celsius, 2)}°C")
+    else:
+        print("Starting Flask admin server on port 5000...")
+        flask_app.run(host='0.0.0.0', port=5000)
