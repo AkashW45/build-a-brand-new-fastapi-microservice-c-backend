@@ -64,3 +64,12 @@ def test_admin_page_via_flask():
     assert "Unit Converter Service" in html
     assert "Uptime" in html
     assert "seconds" in html or "minutes" in html
+
+
+def test_root_html_page():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    html = response.text
+    assert "Celsius to Fahrenheit" in html
+    assert "Convert" in html

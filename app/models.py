@@ -20,3 +20,7 @@ class HealthResponse(BaseModel):
 class AdminInfo(BaseModel):
     service_name: str
     uptime_seconds: float
+
+
+class CelsiusInput(BaseModel):
+    celsius: float
