@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, HTMLResponse
+from fastapi import FastAPI, Query, HTMLResponse, Form
 from datetime import datetime, timezone
 from app.models import TemperatureResponse, DistanceResponse, HealthResponse
 
@@ -35,6 +35,46 @@ async def admin_page():
             <h1>Unit Converter Service</h1>
             <p>Service Name: Unit Converter Service</p>
             <p>Uptime: {uptime}</p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+@app.get("/", response_class=HTMLResponse)
+async def home_page():
+    html_content = """
+    <html>
+        <head><title>Celsius to Fahrenheit Converter</title></head>
+        <body>
+            <h1>Celsius to Fahrenheit Converter</h1>
+            <form method="post" action="/">
+                <label for="celsius">Celsius:</label>
+                <input type="number" name="celsius" step="any" required>
+                <input type="submit" value="Convert">
+            </form>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+@app.post("/", response_class=HTMLResponse)
+async def convert_home(celsius: float = Form(...)):
+    fahrenheit = (celsius * 9/5) + 32
+    kelvin = celsius + 273.15
+    html_content = f"""
+    <html>
+        <head><title>Celsius to Fahrenheit Converter</title></head>
+        <body>
+            <h1>Celsius to Fahrenheit Converter</h1>
+            <form method="post" action="/">
+                <label for="celsius">Celsius:</label>
+                <input type="number" name="celsius" step="any" required>
+                <input type="submit" value="Convert">
+            </form>
+            <p>{celsius}°C = {round(fahrenheit, 2)}°F = {round(kelvin, 2)}K</p>
+            <p><a href="/">Convert another</a></p>
         </body>
     </html>
     """
